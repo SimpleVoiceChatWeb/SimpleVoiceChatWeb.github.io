@@ -8,19 +8,8 @@ class RnnoiseProcessor extends AudioWorkletProcessor {
     this.bufferIndex = 0;
     this.inputHeapPtr = 0;
     this.outputHeapPtr = 0;
-    // 0 = raw microphone, 1 = fully denoised, matching the mod's strength.
-    this.strength = 1.0;
-    this.enabled = true;
     
     this.port.onmessage = (event) => {
-      if (event.data.type === 'settings') {
-        if (typeof event.data.strength === 'number') {
-          this.strength = Math.max(0, Math.min(1, event.data.strength));
-        }
-        if (typeof event.data.enabled === 'boolean') {
-          this.enabled = event.data.enabled;
-        }
-      }
       if (event.data.type === 'rnnoise-module') {
         this.rnnoiseModule = event.data.module;
         // Allocate heap buffers for input/output
@@ -37,7 +26,7 @@ class RnnoiseProcessor extends AudioWorkletProcessor {
     const input = inputs[0];
     const output = outputs[0];
 
-    if (!input || !input[0] || !this.enabled || !this.rnnoiseModule || this.rnnoisePtr === null) {
+    if (!input || !input[0] || !this.rnnoiseModule || this.rnnoisePtr === null) {
       // Pass through if no processor
       if (input && input[0] && output[0]) {
         output[0].set(input[0]);
@@ -58,15 +47,9 @@ class RnnoiseProcessor extends AudioWorkletProcessor {
         // Process with RNNoise
         this.rnnoiseModule._rnnoise_process_frame(this.rnnoisePtr, this.inputHeapPtr, this.outputHeapPtr);
         
-        // Copy result back and blend with the dry signal by the strength, so
-        // a low setting keeps some of the room and avoids the metallic voice.
+        // Copy result back
         const processed = new Float32Array(this.rnnoiseModule.HEAPF32.buffer, this.outputHeapPtr, 480);
-        const mix = this.strength;
-        const start = i - 479;
-        for (let n = 0; n < 480; n++) {
-          const dry = this.buffer[start + n] ?? 0;
-          outputChannel[start + n] = dry + (processed[n] - dry) * mix;
-        }
+        outputChannel.set(processed);
         this.bufferIndex = 0;
       }
     }
