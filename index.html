@@ -1,25 +1,420 @@
 <!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="SimpleVoiceChat - Echtzeit-Sprachkommunikation mit 3D-Audio und Rauschunterdrückung" />
-    <meta name="theme-color" content="#2c3e50" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-    </noscript>
-    <title>SimpleVoiceChat</title>
-    <script type="module" crossorigin src="/assets/index-DCEIaYgb.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-BO3cXSc2.js">
-    <link rel="modulepreload" crossorigin href="/assets/webrtc-Cu4u1MIl.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-PGhEF7lA.css">
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e0e0e">
+  <title>SimpleVoiceChatWeb – Voice chat in the browser</title>
+  <meta name="description" content="Join a Simple Voice Chat Minecraft server straight from your browser. No mod, no launcher install – one link and you are in the call.">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SimpleVoiceChatWeb">
+  <meta property="og:title" content="SimpleVoiceChatWeb – Voice chat in the browser">
+  <meta property="og:description" content="Join a Simple Voice Chat Minecraft server straight from your browser. No mod, no launcher install.">
+  <meta property="og:url" content="https://SimpleVCWeb.github.io">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SimpleVoiceChatWeb – Voice chat in the browser">
+  <meta name="twitter:description" content="Join a Simple Voice Chat Minecraft server straight from your browser.">
+  <link rel="canonical" href="https://SimpleVCWeb.github.io/">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+  <!-- Old links: keep ?code=… and #/… working. Must run before the page renders. -->
+  <script>
+    (function () {
+      var path = location.pathname;
+      if (path !== '/' && path !== '/index.html') return;
+      var legacyHash = location.hash.indexOf('#/') === 0;
+      var hasCode = location.search.indexOf('code=') !== -1;
+      if (!legacyHash && !hasCode) return;
+      location.replace('/app/' + location.search + location.hash);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="SimpleVoiceChatWeb">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="32" height="32">
+            <defs>
+              <linearGradient id="brand-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#42a5f5"></stop>
+                <stop offset="100%" stop-color="#1e88e5"></stop>
+              </linearGradient>
+            </defs>
+            <circle cx="16" cy="16" r="15" fill="url(#brand-gradient)"></circle>
+            <path d="M16 6a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0v-5a4 4 0 0 1 4-4z" fill="#fff"></path>
+            <path d="M9 14v1a7 7 0 0 0 14 0v-1" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M16 22v4M12 26h8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+        </span>
+        <span class="brand-name">SimpleVoiceChatWeb</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Main">
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#how" data-i18n="nav.how">How it works</a>
+        <a href="/docs/" data-i18n="nav.docs">Docs</a>
+        <a href="https://github.com/SimpleVoiceChatWeb" data-i18n="nav.github">GitHub</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="lang-toggle" class="lang-toggle" type="button" aria-label="Switch language">DE</button>
+        <a class="btn btn-primary btn-sm" href="/app/" data-i18n="header.cta">Open voice chat</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container">
+        <p class="badge" data-i18n="hero.badge">Alpha · expect rough edges</p>
+        <h1 data-i18n="hero.title">Voice chat in the browser.</h1>
+        <p class="lede" data-i18n="hero.lede">
+          Join a Simple Voice Chat Minecraft server straight from your browser. No mod,
+          no launcher install, no extra account – one link and you are in the call.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="/app/" data-i18n="hero.ctaPrimary">Open voice chat</a>
+          <a class="btn btn-outline btn-lg" href="/docs/" data-i18n="hero.ctaSecondary">Read the docs</a>
+        </div>
+        <p class="hero-note" data-i18n="hero.note">
+          Works in Chrome, Edge, Firefox and Safari on desktop. Microphone access is required.
+        </p>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="container">
+        <h2 data-i18n="features.title">What you get</h2>
+        <p class="section-lede" data-i18n="features.lede">Everything the mod can do, without the installation.</p>
+
+        <div class="grid">
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f1.title">No install for players</h3>
+            <p data-i18n="f1.text">Browser players join with a link. Nothing to download, nothing to configure.</p>
+          </article>
+
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3z"></path><path d="M12 12 4 7.5"></path><path d="m12 12 8-4.5"></path><path d="M12 12v9"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f2.title">Real 3D audio</h3>
+            <p data-i18n="f2.text">Positional sound with distance attenuation – the same falloff the mod uses.</p>
+          </article>
+
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="8" r="3"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path><path d="M16 5.5a3 3 0 0 1 0 5"></path><path d="M18.5 20c0-2.2-.8-4.2-2.2-5.7"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f3.title">Real SVC groups</h3>
+            <p data-i18n="f3.text">Create and join real Simple Voice Chat groups, including password-protected ones.</p>
+          </article>
+
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><path d="M14 14h3v3h-3zM20 14v7h-7"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f4.title">Invite codes and QR</h3>
+            <p data-i18n="f4.text"><code>/voice link</code> creates a short-lived code and a QR card in game.</p>
+          </article>
+
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v4"></path><path d="M8 22h8"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f5.title">Push-to-talk and mixer</h3>
+            <p data-i18n="f5.text">Hold to talk, per-player volume, mute and deafen – synced with the mod.</p>
+          </article>
+
+          <article class="card">
+            <span class="card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="7" rx="2"></rect><rect x="3" y="13" width="18" height="7" rx="2"></rect><path d="M7 7.5h.01M7 16.5h.01"></path>
+              </svg>
+            </span>
+            <h3 data-i18n="f6.title">Server-side bridge</h3>
+            <p data-i18n="f6.text">The plugin translates between WebRTC and Simple Voice Chat. Audio stays on your server.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="section section-alt">
+      <div class="container">
+        <h2 data-i18n="how.title">How it works</h2>
+        <p class="section-lede" data-i18n="how.lede">
+          The server runs Simple Voice Chat plus the SimpleVoiceChatWeb plugin. The plugin
+          bridges WebRTC audio from the browser into SVC, so a browser participant is a full
+          player: positional audio, groups, mute and deafen, exactly like with the mod.
+        </p>
+
+        <div class="flow">
+          <div class="flow-node">
+            <span class="flow-label" data-i18n="how.browser">Browser</span>
+          </div>
+          <span class="flow-link" aria-hidden="true"><span data-i18n="how.webrtc">WebRTC</span></span>
+          <div class="flow-node">
+            <span class="flow-label" data-i18n="how.plugin">Plugin</span>
+          </div>
+          <span class="flow-link" aria-hidden="true"><span data-i18n="how.svc">SVC API</span></span>
+          <div class="flow-node">
+            <span class="flow-label" data-i18n="how.minecraft">Minecraft</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="server" class="section">
+      <div class="container">
+        <h2 data-i18n="server.title">For server owners</h2>
+        <p class="section-lede" data-i18n="server.lede">Three steps and your players can listen in without the mod.</p>
+
+        <ol class="steps">
+          <li>
+            <span class="step-number" aria-hidden="true">1</span>
+            <h3 data-i18n="s1.title">Install</h3>
+            <p data-i18n="s1.text">Install Simple Voice Chat and the SimpleVoiceChatWeb plugin on your Paper or Spigot server.</p>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">2</span>
+            <h3 data-i18n="s2.title">Generate an invite</h3>
+            <p data-i18n="s2.text">Run <code>/voice link</code> in game. The player gets a code and a QR card.</p>
+          </li>
+          <li>
+            <span class="step-number" aria-hidden="true">3</span>
+            <h3 data-i18n="s3.title">Share</h3>
+            <p data-i18n="s3.text">Share the link or let them scan the QR – the browser client opens with the code filled in.</p>
+          </li>
+        </ol>
+
+        <p class="section-cta">
+          <a class="btn btn-outline" href="/docs/en/quickstart.html" data-i18n="server.cta">Quick start guide</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="section invite-section">
+      <div class="container">
+        <div class="invite-panel">
+          <h2 data-i18n="invite.title">Have an invite code?</h2>
+          <p data-i18n="invite.lede">Enter it here, or open the link you were given – the code is filled in automatically.</p>
+          <form class="invite-form" action="/app/" method="get">
+            <label class="sr-only" for="invite-code">Invite code</label>
+            <input
+              id="invite-code"
+              name="code"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="10"
+              placeholder="K7P4QX9LM2"
+              data-i18n-placeholder="invite.placeholder">
+            <button class="btn btn-primary" type="submit" data-i18n="invite.button">Join</button>
+          </form>
+          <p class="invite-note" data-i18n="invite.note">Codes are single-use and expire after 5 minutes.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-name">SimpleVoiceChatWeb</span>
+        <p data-i18n="footer.tagline">Voice chat for Minecraft in the browser.</p>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/app/" data-i18n="footer.client">Web client</a>
+        <a href="/docs/" data-i18n="footer.docs">Documentation</a>
+        <a href="https://github.com/SimpleVoiceChatWeb" data-i18n="footer.github">GitHub</a>
+        <a href="https://github.com/SimpleVoiceChatWeb/issues" data-i18n="footer.issues">Issues</a>
+      </nav>
+    </div>
+    <div class="container footer-legal">
+      <p data-i18n="footer.legal">Minecraft is a trademark of Mojang Synergies AB. This is not an official product.</p>
+    </div>
+  </footer>
+
+  <noscript>
+    <p class="noscript">JavaScript is disabled. Open <a href="/app/">/app/</a> directly.</p>
+  </noscript>
+
+  <script>
+    (function () {
+      var messages = {
+        en: {
+          'nav.features': 'Features',
+          'nav.how': 'How it works',
+          'nav.docs': 'Docs',
+          'nav.github': 'GitHub',
+          'header.cta': 'Open voice chat',
+          'hero.badge': 'Alpha · expect rough edges',
+          'hero.title': 'Voice chat in the browser.',
+          'hero.lede': 'Join a Simple Voice Chat Minecraft server straight from your browser. No mod, no launcher install, no extra account – one link and you are in the call.',
+          'hero.ctaPrimary': 'Open voice chat',
+          'hero.ctaSecondary': 'Read the docs',
+          'hero.note': 'Works in Chrome, Edge, Firefox and Safari on desktop. Microphone access is required.',
+          'features.title': 'What you get',
+          'features.lede': 'Everything the mod can do, without the installation.',
+          'f1.title': 'No install for players',
+          'f1.text': 'Browser players join with a link. Nothing to download, nothing to configure.',
+          'f2.title': 'Real 3D audio',
+          'f2.text': 'Positional sound with distance attenuation – the same falloff the mod uses.',
+          'f3.title': 'Real SVC groups',
+          'f3.text': 'Create and join real Simple Voice Chat groups, including password-protected ones.',
+          'f4.title': 'Invite codes and QR',
+          'f4.text': '<code>/voice link</code> creates a short-lived code and a QR card in game.',
+          'f5.title': 'Push-to-talk and mixer',
+          'f5.text': 'Hold to talk, per-player volume, mute and deafen – synced with the mod.',
+          'f6.title': 'Server-side bridge',
+          'f6.text': 'The plugin translates between WebRTC and Simple Voice Chat. Audio stays on your server.',
+          'how.title': 'How it works',
+          'how.lede': 'The server runs Simple Voice Chat plus the SimpleVoiceChatWeb plugin. The plugin bridges WebRTC audio from the browser into SVC, so a browser participant is a full player: positional audio, groups, mute and deafen, exactly like with the mod.',
+          'how.browser': 'Browser',
+          'how.plugin': 'Plugin',
+          'how.minecraft': 'Minecraft',
+          'how.webrtc': 'WebRTC',
+          'how.svc': 'SVC API',
+          'server.title': 'For server owners',
+          'server.lede': 'Three steps and your players can listen in without the mod.',
+          's1.title': 'Install',
+          's1.text': 'Install Simple Voice Chat and the SimpleVoiceChatWeb plugin on your Paper or Spigot server.',
+          's2.title': 'Generate an invite',
+          's2.text': 'Run <code>/voice link</code> in game. The player gets a code and a QR card.',
+          's3.title': 'Share',
+          's3.text': 'Share the link or let them scan the QR – the browser client opens with the code filled in.',
+          'server.cta': 'Quick start guide',
+          'invite.title': 'Have an invite code?',
+          'invite.lede': 'Enter it here, or open the link you were given – the code is filled in automatically.',
+          'invite.placeholder': 'K7P4QX9LM2',
+          'invite.button': 'Join',
+          'invite.note': 'Codes are single-use and expire after 5 minutes.',
+          'footer.tagline': 'Voice chat for Minecraft in the browser.',
+          'footer.client': 'Web client',
+          'footer.docs': 'Documentation',
+          'footer.github': 'GitHub',
+          'footer.issues': 'Issues',
+          'footer.legal': 'Minecraft is a trademark of Mojang Synergies AB. This is not an official product.'
+        },
+        de: {
+          'nav.features': 'Funktionen',
+          'nav.how': 'So funktioniert\'s',
+          'nav.docs': 'Doku',
+          'nav.github': 'GitHub',
+          'header.cta': 'Voice-Chat öffnen',
+          'hero.badge': 'Alpha · mit Ecken und Kanten',
+          'hero.title': 'Sprachchat im Browser.',
+          'hero.lede': 'Tritt einem Simple-Voice-Chat-Server direkt aus dem Browser bei. Kein Mod, keine Installation, kein zusätzlicher Account – ein Link und du bist im Call.',
+          'hero.ctaPrimary': 'Voice-Chat öffnen',
+          'hero.ctaSecondary': 'Doku lesen',
+          'hero.note': 'Läuft in Chrome, Edge, Firefox und Safari auf dem Desktop. Mikrofonzugriff wird benötigt.',
+          'features.title': 'Was du bekommst',
+          'features.lede': 'Alles, was der Mod kann – ohne Installation.',
+          'f1.title': 'Keine Installation für Spieler',
+          'f1.text': 'Browser-Spieler joinen per Link. Nichts herunterladen, nichts einrichten.',
+          'f2.title': 'Echtes 3D-Audio',
+          'f2.text': 'Positionsabhängiger Klang mit Entfernungsdämpfung – dieselbe Falloff-Kurve wie beim Mod.',
+          'f3.title': 'Echte SVC-Gruppen',
+          'f3.text': 'Gruppen erstellen und beitreten, inklusive passwortgeschützter.',
+          'f4.title': 'Einladungscode und QR',
+          'f4.text': '<code>/voice link</code> erzeugt einen kurzlebigen Code und eine QR-Karte im Spiel.',
+          'f5.title': 'Push-to-Talk und Mixer',
+          'f5.text': 'Taste halten zum Sprechen, Lautstärke pro Spieler, Mute und Deafen – synchron mit dem Mod.',
+          'f6.title': 'Brücke auf dem Server',
+          'f6.text': 'Das Plugin übersetzt zwischen WebRTC und Simple Voice Chat. Audio bleibt auf deinem Server.',
+          'how.title': 'So funktioniert\'s',
+          'how.lede': 'Auf dem Server laufen Simple Voice Chat und das SimpleVoiceChatWeb-Plugin. Das Plugin übersetzt WebRTC-Audio aus dem Browser in SVC – ein Browser-Spieler ist damit ein vollwertiger Spieler: Position, Gruppen, Mute und Deafen wie mit dem Mod.',
+          'how.browser': 'Browser',
+          'how.plugin': 'Plugin',
+          'how.minecraft': 'Minecraft',
+          'how.webrtc': 'WebRTC',
+          'how.svc': 'SVC-API',
+          'server.title': 'Für Serverbesitzer',
+          'server.lede': 'Drei Schritte, dann können Spieler ohne Mod mithören.',
+          's1.title': 'Installieren',
+          's1.text': 'Simple Voice Chat und das SimpleVoiceChatWeb-Plugin auf dem Paper- oder Spigot-Server installieren.',
+          's2.title': 'Code erzeugen',
+          's2.text': 'Im Spiel <code>/voice link</code> ausführen. Der Spieler bekommt einen Code und eine QR-Karte.',
+          's3.title': 'Teilen',
+          's3.text': 'Link teilen oder QR scannen lassen – der Browser-Client öffnet sich mit ausgefülltem Code.',
+          'server.cta': 'Zur Schnellstart-Anleitung',
+          'invite.title': 'Einladungscode?',
+          'invite.lede': 'Gib ihn hier ein, oder öffne den Link, den du bekommen hast – der Code wird automatisch übernommen.',
+          'invite.placeholder': 'K7P4QX9LM2',
+          'invite.button': 'Beitreten',
+          'invite.note': 'Codes sind einmalig und laufen nach 5 Minuten ab.',
+          'footer.tagline': 'Sprachchat für Minecraft im Browser.',
+          'footer.client': 'Web-Client',
+          'footer.docs': 'Dokumentation',
+          'footer.github': 'GitHub',
+          'footer.issues': 'Issues',
+          'footer.legal': 'Minecraft ist eine Marke von Mojang Synergies AB. Kein offizielles Produkt.'
+        }
+      };
+
+      var stored = null;
+      try { stored = localStorage.getItem('svc-locale'); } catch (error) { /* private mode */ }
+
+      var lang = (stored === 'de' || stored === 'en')
+        ? stored
+        : ((navigator.language || 'en').toLowerCase().indexOf('de') === 0 ? 'de' : 'en');
+
+      function apply(next) {
+        var table = messages[next] || messages.en;
+        document.documentElement.lang = next;
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) {
+          var text = table[el.getAttribute('data-i18n')] || messages.en[el.getAttribute('data-i18n')];
+          if (text) el.innerHTML = text;
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-placeholder]'), function (el) {
+          var key = el.getAttribute('data-i18n-placeholder');
+          var text = table[key] || messages.en[key];
+          if (text) el.setAttribute('placeholder', text);
+        });
+
+        var toggle = document.getElementById('lang-toggle');
+        if (toggle) {
+          toggle.textContent = next === 'de' ? 'EN' : 'DE';
+          toggle.setAttribute('aria-label', next === 'de' ? 'Switch to English' : 'Auf Deutsch umschalten');
+        }
+      }
+
+      apply(lang);
+
+      var toggle = document.getElementById('lang-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          lang = lang === 'de' ? 'en' : 'de';
+          try { localStorage.setItem('svc-locale', lang); } catch (error) { /* private mode */ }
+          apply(lang);
+        });
+      }
+    })();
+  </script>
+</body>
 </html>
